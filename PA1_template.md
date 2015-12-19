@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
@@ -13,7 +8,8 @@ Show any code that is needed to
 2. Process/transform the data (if necessary) into a format suitable for your 
 analysis
 
-```{r}
+
+```r
 library(ggplot2)
 library(lattice)
 url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
@@ -36,7 +32,8 @@ activityMonitoringData <- read.csv("activity.csv")
 1. Ignoring the missing values in the dataset, this histogram displays the
 total number of steps taken each day.
 
-```{r}
+
+```r
 steps.date <- aggregate(steps ~ date, data = activityMonitoringData, FUN = sum,
                         na.rm = TRUE)
 
@@ -45,25 +42,47 @@ ggplot(steps.date, aes(x = steps)) + geom_histogram(fill = "blue", binwidth = 10
        labs(x="Number of Steps per Day",y="Number of times in a day") + theme_bw() 
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
 
 2. The mean and median of the total number of steps taken per day is:
-```{r}
+
+```r
 mean(steps.date$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(steps.date$steps)
+```
+
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
 1. Below is a time series plot (i.e. type = "l") of the 5-minute interval 
 (x-axis) and the average number of steps taken, averaged across all days (y-axis).
-```{r}
+
+```r
 steps.interval <- aggregate(steps ~ interval, data=activityMonitoringData, FUN=mean)
 plot(steps.interval, type="l")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
 2. The 5-minute interval, on average across all the days in the dataset, which 
 contains the maximum number of steps is:
-```{r}
+
+```r
 steps.interval$interval[which.max(steps.interval$steps)]
+```
+
+```
+## [1] 835
 ```
 
 
@@ -72,14 +91,20 @@ Note that there are a number of days/intervals where there are missing values (c
 The presence of missing days may introduce bias into some calculations or summaries of the data.
 
 1. The total number of missing values in the dataset is:
-```{r}
+
+```r
 sum(is.na(activityMonitoringData))
+```
+
+```
+## [1] 2304
 ```
 
 2. My strategy for filling in all of the missing values in the dataset is to the mean for that 5-minute interval
    and to create a new dataset that is equal to the original dataset but with the missing data filled in.
 
-```{r}
+
+```r
 StepsIntervalMean <- aggregate(steps ~ interval, data = activityMonitoringData, FUN = mean)
 imputeNA <- numeric()
 for (i in 1:nrow(activityMonitoringData)) {
@@ -97,7 +122,8 @@ imputed_activityMonitoringData$steps <- imputeNA
 
 3. Using the imputed values in the dataset, this histogram displays the
 total number of steps taken each day:
-```{r}
+
+```r
 steps.date <- aggregate(steps ~ date, data = imputed_activityMonitoringData, FUN = sum,
                         na.rm = TRUE)
 
@@ -106,10 +132,24 @@ ggplot(steps.date, aes(x = steps)) + geom_histogram(fill = "blue", binwidth = 10
        labs(x="Number of Steps per Day",y="Number of times in a day") + theme_bw() 
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
+
 4. The mean and median of the total number of steps taken per day, using imputed data, is:
-```{r}
+
+```r
 mean(steps.date$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(steps.date$steps)
+```
+
+```
+## [1] 10766.19
 ```
 
 5. What is the impact of imputing missing data on the estimates of the total 
@@ -122,7 +162,8 @@ median(steps.date$steps)
 1. To review the activity differences between weekday and weekend observations I 
    created a new factor variable that as two levels (weekday and weekend). I
    used the new imputed data.
-```{r, cache=TRUE}
+
+```r
 daytype <- function(date) {
     if (weekdays(as.Date(date)) %in% c("Saturday", "Sunday")) {
         "weekend"
@@ -136,9 +177,12 @@ imputed_activityMonitoringData$daytype <- as.factor(sapply(imputed_activityMonit
 2.  Below is a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average 
 number of steps taken, averaged across all weekday days or weekend days (y-axis). 
 
-```{r}
+
+```r
 stepsByDayType <- aggregate(steps ~ interval + daytype, data = imputed_activityMonitoringData, mean)
 names(stepsByDayType) <- c("interval", "daytype", "steps")
 xyplot(steps ~ interval | daytype, stepsByDayType, type = "l", layout = c(1, 2), 
     xlab = "Interval", ylab = "Number of steps")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
